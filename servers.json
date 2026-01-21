@@ -1,0 +1,10 @@
+[
+    {
+        "name": "Primary Server (Local)",
+        "host": "127.0.0.1",
+        "port": 8081,
+        "key": "e052acdac7f6774345e13deadd5363f3",
+        "role": "sync",
+        "type": "native"
+    }
+]
