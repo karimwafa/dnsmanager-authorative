@@ -88,7 +88,7 @@ require_once 'includes/header.php';
                                         <?php endif; ?>
                                     </td>
                                     <td data-label="Actions" class="text-end">
-                                        <div class="d-flex justify-content-end gap-2">
+                                        <div class="d-flex justify-content-end align-items-center gap-2">
                                             <a href="view_zone.php?zone=<?= urlencode($zone['id']) ?>" class="btn btn-sm btn-outline-primary" title="Manage Zone">
                                                 <i class="bi bi-gear"></i> Manage
                                             </a>

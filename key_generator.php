@@ -113,12 +113,12 @@ require_once 'includes/header.php';
                                     <td data-label="API Key" class="font-monospace text-muted"><?= htmlspecialchars(substr($displayKey, 0, 10)) ?>...</td>
                                     <td data-label="Created At"><small><?= htmlspecialchars($k['created_at']) ?></small></td>
                                     <td data-label="Actions" class="text-end">
-                                        <div class="btn-group btn-group-sm">
-                                            <button class="btn btn-outline-primary copy-btn" data-key="<?= htmlspecialchars($displayKey, ENT_QUOTES, 'UTF-8') ?>">Copy</button>
-                                            <form method="POST" class="d-inline" onsubmit="return confirm('Delete this key record?');">
+                                        <div class="d-flex justify-content-end align-items-center gap-2">
+                                            <button class="btn btn-sm btn-outline-primary copy-btn" data-key="<?= htmlspecialchars($displayKey, ENT_QUOTES, 'UTF-8') ?>"><i class="bi bi-clipboard"></i> Copy</button>
+                                            <form method="POST" class="d-inline m-0" onsubmit="return confirm('Delete this key record?');">
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="id" value="<?= $k['id'] ?>">
-                                                <button type="submit" class="btn btn-outline-danger" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">Delete</button>
+                                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Delete</button>
                                             </form>
                                         </div>
                                     </td>

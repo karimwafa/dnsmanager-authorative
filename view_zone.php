@@ -95,7 +95,7 @@ require_once 'includes/header.php';
                                     <td data-label="TTL"><?= htmlspecialchars($rrset['ttl']) ?></td>
                                     <td data-label="Content" class="text-break"><?= htmlspecialchars($record['content']) ?></td>
                                     <td data-label="Actions" class="text-end">
-                                        <div class="d-flex justify-content-end gap-2">
+                                        <div class="d-flex justify-content-end align-items-center gap-2">
                                             <button class="btn btn-sm btn-outline-primary"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#editModal"

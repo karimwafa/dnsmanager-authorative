@@ -69,14 +69,16 @@ function checkStatus($server)
                                             </form>
                                         </td>
                                         <td data-label="Actions" class="text-end">
-                                            <form action="actions.php" method="POST" class="d-inline" onsubmit="return confirm('Remove this server?');">
-                                                <?php csrf_field(); ?>
-                                                <input type="hidden" name="action" value="delete_server">
-                                                <input type="hidden" name="id" value="<?= $server['id'] ?>">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove">
-                                                    <i class="bi bi-trash"></i> Delete
-                                                </button>
-                                            </form>
+                                            <div class="d-flex justify-content-end align-items-center">
+                                                <form action="actions.php" method="POST" class="d-inline m-0" onsubmit="return confirm('Remove this server?');">
+                                                    <?php csrf_field(); ?>
+                                                    <input type="hidden" name="action" value="delete_server">
+                                                    <input type="hidden" name="id" value="<?= $server['id'] ?>">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove">
+                                                        <i class="bi bi-trash"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
