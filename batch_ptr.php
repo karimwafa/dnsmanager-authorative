@@ -15,36 +15,46 @@ $primary = reset($clients);
 $zones = $primary->getZones()['body'];
 
 $msg = '';
+$errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $zoneId = $_POST['zone_id'];
-    $subnet = $_POST['subnet']; // e.g., 103.170.13
-    $domain = $_POST['domain']; // e.g., sriboga-smg.co.id
-    $start = (int)$_POST['start'];
-    $end = (int)$_POST['end'];
+    $zoneId  = $_POST['zone_id'];    // e.g. "13.170.103.in-addr.arpa."
+    $subnet  = $_POST['subnet'];     // e.g. "103.170.13"
+    $domain  = $_POST['domain'];     // e.g. "sriboga-smg.co.id"
+    $start   = (int)$_POST['start'];
+    $end     = (int)$_POST['end'];
+    $ttl     = (int)($_POST['ttl'] ?? 300);
+
+    $parts      = explode('.', rtrim($subnet, '.'));
+    $dashSubnet = implode('-', $parts);
 
     $count = 0;
     foreach ($clients as $client) {
         for ($i = $start; $i <= $end; $i++) {
-            // Logic for 103.170.13.x
-            // PTR Name: x.13.170.103.in-addr.arpa (Constructed from Zone)
-            // But user selects Zone ID.
+            // Build FQDN for PTR name: e.g. 1.13.170.103.in-addr.arpa.
+            // The zone is e.g. 13.170.103.in-addr.arpa.
+            // Relative label within zone = just the last octet ($i)
+            $ptrName = $i . '.' . rtrim($zoneId, '.');
+            if (substr($ptrName, -1) !== '.') $ptrName .= '.';
 
-            // Allow user to specify pattern
-            // For now, simple assumption: Zone is reverse zone.
-            // Name: $i
-            // Content: subnet-replaced-dash-$i.domain
-
-            $ptrName = "$i"; // Relative to zone
-            $parts = explode('.', $subnet);
-            $dashSubnet = implode('-', $parts);
-            $ptrContent = "$dashSubnet-$i.$domain";
-
+            // PTR content: dashed format, e.g. 103-170-13-1.sriboga-smg.co.id.
+            $ptrContent = $dashSubnet . '-' . $i . '.' . rtrim($domain, '.');
             if (substr($ptrContent, -1) !== '.') $ptrContent .= '.';
 
-            $client->addRecord($zoneId, $ptrName, 'PTR', $ptrContent);
+            $res = $client->addRecord($zoneId, $ptrName, 'PTR', $ptrContent, $ttl);
+            if ($res['code'] >= 200 && $res['code'] < 300) {
+                $count++;
+            } else {
+                $errors[] = "Failed for $i: " . json_encode($res['body']);
+            }
         }
     }
-    $msg = "Batch operation sent to cluster for range $start-$end.";
+
+    if ($count > 0) {
+        $msg = "✅ Berhasil menambahkan $count PTR record untuk range $start–$end ke zona $zoneId.";
+    }
+    if (!empty($errors)) {
+        $msg .= " ⚠️ " . count($errors) . " record gagal.";
+    }
 }
 
 $title = "Batch PTR Generator";
@@ -53,6 +63,9 @@ require_once 'includes/header.php';
 
 <div class="container py-4">
     <?php if ($msg): ?><div class="alert alert-success"><?= $msg ?></div><?php endif; ?>
+    <?php if (!empty($errors)): ?>
+        <div class="alert alert-warning small"><strong>Detail error:</strong><br><?= implode('<br>', array_map('htmlspecialchars', $errors)) ?></div>
+    <?php endif; ?>
 
     <div class="card shadow-sm border-0">
         <div class="card-header border-0 bg-transparent pt-4 pb-2">
@@ -78,12 +91,16 @@ require_once 'includes/header.php';
                 </div>
                 <div class="row">
                     <div class="col">
-                        <label>Start IP</label>
+                        <label class="form-label">Start IP</label>
                         <input type="number" name="start" class="form-control" value="1">
                     </div>
                     <div class="col">
-                        <label>End IP</label>
+                        <label class="form-label">End IP</label>
                         <input type="number" name="end" class="form-control" value="254">
+                    </div>
+                    <div class="col">
+                        <label class="form-label">TTL (detik)</label>
+                        <input type="number" name="ttl" class="form-control" value="300">
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary mt-3">Generate & Push to Cluster</button>

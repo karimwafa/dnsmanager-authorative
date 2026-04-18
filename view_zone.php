@@ -28,23 +28,25 @@ require_once 'includes/header.php';
 ?>
 
 <div class="container py-4">
+
+    <!-- Add Record Card -->
     <div class="card mb-4 border-0 shadow-sm">
-        <div class="card-header border-0 bg-transparent pt-4 pb-0 d-flex align-items-center justify-content-between">
+        <div class="card-header border-0 bg-transparent pt-4 pb-2 d-flex align-items-center justify-content-between">
             <h5 class="mb-0 fw-semibold text-dark"><i class="bi bi-globe text-primary me-2"></i><?= htmlspecialchars($zone['name']) ?></h5>
-            <span class="text-muted small"><i class="bi bi-plus-lg text-primary me-1"></i> Add New Record</span>
+            <span class="text-muted small fw-medium"><i class="bi bi-plus-lg text-primary me-1"></i> Add New Record</span>
         </div>
-        <div class="card-body pt-3">
-            <form action="actions.php" method="POST" class="row g-3">
+        <div class="card-body">
+            <form action="actions.php" method="POST" class="row g-3 align-items-end">
                 <?php csrf_field(); ?>
                 <input type="hidden" name="action" value="add_record">
                 <input type="hidden" name="zone_id" value="<?= htmlspecialchars($zone['id']) ?>">
 
                 <div class="col-md-3">
-                    <label>Name</label>
+                    <label class="form-label">Name</label>
                     <input type="text" name="name" class="form-control" placeholder="@ or subdomain" required>
                 </div>
                 <div class="col-md-2">
-                    <label>Type</label>
+                    <label class="form-label">Type</label>
                     <select name="type" class="form-select">
                         <option value="A">A</option>
                         <option value="AAAA">AAAA</option>
@@ -55,42 +57,53 @@ require_once 'includes/header.php';
                         <option value="PTR">PTR</option>
                     </select>
                 </div>
-                <div class="col-md-5">
-                    <label>Content</label>
+                <div class="col-md-1">
+                    <label class="form-label">TTL</label>
+                    <input type="number" name="ttl" class="form-control" value="3600" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Content</label>
                     <input type="text" name="content" class="form-control" placeholder="1.2.3.4" required>
                 </div>
-                <div class="col-md-2 d-flex align-items-end">
+                <div class="col-md-2">
                     <button type="submit" class="btn btn-primary w-100">Add Record</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Records Table Card -->
     <div class="card shadow-sm border-0">
         <div class="card-header border-0 bg-transparent pt-4 pb-2">
             <h5 class="mb-0 fw-semibold text-dark"><i class="bi bi-card-list text-primary me-2"></i> Records</h5>
         </div>
         <div class="card-body px-0 pt-0">
-            <div class="table-responsive-cards px-0">
+            <div class="table-responsive">
                 <table id="recordsTable" class="table table-hover mb-0 align-middle">
                     <thead>
                         <tr>
-                            <th style="width: 20%;">Name</th>
-                            <th style="width: 10%;">Type</th>
-                            <th style="width: 10%;">TTL</th>
-                            <th style="width: 45%;">Content</th>
-                            <th style="width: 15%; text-align: right;" data-orderable="false">Actions</th>
+                            <th style="width: 22%; padding-left: 32px;">Name</th>
+                            <th style="width: 8%;">Type</th>
+                            <th style="width: 8%;">TTL</th>
+                            <th style="width: 42%;">Content</th>
+                            <th style="width: 20%; text-align: right; padding-right: 32px;" data-orderable="false">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($zone['rrsets'] as $rrset): ?>
                             <?php foreach ($rrset['records'] as $record): ?>
                                 <tr>
-                                    <td data-label="Name"><?= htmlspecialchars($rrset['name']) ?></td>
-                                    <td data-label="Type"><span class="badge bg-secondary"><?= htmlspecialchars($rrset['type']) ?></span></td>
-                                    <td data-label="TTL"><?= htmlspecialchars($rrset['ttl']) ?></td>
-                                    <td data-label="Content" class="text-break"><?= htmlspecialchars($record['content']) ?></td>
-                                    <td data-label="Actions" class="text-end">
+                                    <td data-label="Name" style="padding-left: 32px;" class="fw-medium"><?= htmlspecialchars($rrset['name']) ?></td>
+                                    <td data-label="Type">
+                                        <?php
+                                        $typeColors = ['A'=>'primary','AAAA'=>'info','CNAME'=>'warning','MX'=>'success','TXT'=>'secondary','NS'=>'dark','PTR'=>'danger','SOA'=>'secondary'];
+                                        $color = $typeColors[$rrset['type']] ?? 'secondary';
+                                        ?>
+                                        <span class="badge bg-<?= $color ?> bg-opacity-75"><?= htmlspecialchars($rrset['type']) ?></span>
+                                    </td>
+                                    <td data-label="TTL" class="text-muted small"><?= htmlspecialchars($rrset['ttl']) ?></td>
+                                    <td data-label="Content" class="text-break font-monospace small"><?= htmlspecialchars($record['content']) ?></td>
+                                    <td data-label="Actions" style="padding-right: 32px;" class="text-end">
                                         <div class="d-flex justify-content-end align-items-center gap-2">
                                             <button class="btn btn-sm btn-outline-primary"
                                                 data-bs-toggle="modal"
@@ -122,7 +135,6 @@ require_once 'includes/header.php';
             </div>
         </div>
     </div>
-</div>
 </div>
 
 <!-- Edit Modal -->
