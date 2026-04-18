@@ -8,10 +8,14 @@ require_once 'PDNSClient.php';
 
     // Get current local API Key from config/pdns
     $local_pdns_key = '';
-    if (file_exists('/etc/powerdns/pdns.conf')) {
-        $conf = file_get_contents('/etc/powerdns/pdns.conf');
-        if (preg_match('/api-key=(.*)/', $conf, $matches)) {
-            $local_pdns_key = trim($matches[1]);
+    $pdns_conf_paths = ['/etc/powerdns/pdns.conf', '/etc/powerdns/pdns.d/api.conf'];
+    foreach ($pdns_conf_paths as $path) {
+        if (file_exists($path)) {
+            $conf = file_get_contents($path);
+            if (preg_match('/api-key=(.*)/', $conf, $matches)) {
+                $local_pdns_key = trim($matches[1]);
+                break; // Found it
+            }
         }
     }
 

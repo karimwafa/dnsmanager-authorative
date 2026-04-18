@@ -229,6 +229,7 @@ if [ -f "/etc/powerdns/pdns.conf" ]; then
     cp /etc/powerdns/pdns.conf "/etc/powerdns/pdns.conf.bak.$(date +%s)"
 fi
 
+# Use absolute paths and ensure include-dir is clean
 cat > /etc/powerdns/pdns.conf <<EOF
 launch=gmysql
 gmysql-host=127.0.0.1
@@ -236,15 +237,29 @@ gmysql-user=$DB_PDNS_USER
 gmysql-password=$DB_PDNS_PASS
 gmysql-dbname=$DB_NAME
 
+# Include directory for API and other configs
+include-dir=/etc/powerdns/pdns.d
+EOF
+
+# Create initial API config in include-dir
+cat > /etc/powerdns/pdns.d/api.conf <<EOF
 api=yes
 api-key=$PDNS_API_KEY
 webserver=yes
 webserver-address=0.0.0.0
+webserver-allow-from=127.0.0.1,::1,10.0.0.0/8,192.168.0.0/16,172.16.0.0/12
 webserver-port=8081
-webserver-allow-from=0.0.0.0/0
 EOF
 
 systemctl restart pdns
+
+# Add sudoers for PowerDNS management
+log "Configuring sudoers for web application..."
+# We use full paths for security and compatibility
+cat > /etc/sudoers.d/pdns-web-manager <<EOF
+www-data ALL=(ALL) NOPASSWD: /usr/bin/tee /etc/powerdns/pdns.d/api.conf, /usr/bin/systemctl restart pdns, /bin/systemctl restart pdns
+EOF
+chmod 440 /etc/sudoers.d/pdns-web-manager
 
 # 4. Configure Web Application
 log "Setting up Web Application..."

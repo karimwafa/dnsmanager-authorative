@@ -31,12 +31,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $configContent = "api=yes\napi-key={$generatedKey}\nwebserver=yes\nwebserver-address=0.0.0.0\nwebserver-allow-from=127.0.0.1,::1,10.0.0.0/8,192.168.0.0/16,172.16.0.0/12\nwebserver-port=8081\n";
 
             // Write config using sudo tee
-            $writeCmd = "echo " . escapeshellarg($configContent) . " | sudo /usr/bin/tee /etc/powerdns/pdns.d/api.conf > /dev/null 2>&1";
-            exec($writeCmd, $output, $writeResult);
+            // Write config using sudo tee with printf for robust multi-line handling
+            $writeCmd = "printf " . escapeshellarg($configContent) . " | sudo -n /usr/bin/tee /etc/powerdns/pdns.d/api.conf 2>&1";
+            exec($writeCmd, $writeOutput, $writeResult);
 
             if ($writeResult === 0) {
-                // Restart PowerDNS
-                exec("sudo /bin/systemctl restart pdns 2>&1", $restartOutput, $restartResult);
+                // Restart PowerDNS using full paths
+                $restartCmd = "sudo -n /usr/bin/systemctl restart pdns 2>&1";
+                exec($restartCmd, $restartOutput, $restartResult);
+
+                if ($restartResult !== 0) {
+                    // Try fallback path for systemctl if first one fails
+                    $restartCmd = "sudo -n /bin/systemctl restart pdns 2>&1";
+                    exec($restartCmd, $restartOutput, $restartResult);
+                }
 
                 if ($restartResult === 0) {
                     // Update Primary Server (Local) in cluster_servers if exists
@@ -47,9 +55,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $applyResult = 'success';
                 } else {
                     $applyResult = 'restart_failed';
+                    $errorDetails = implode("\n", $restartOutput);
                 }
             } else {
                 $applyResult = 'write_failed';
+                $errorDetails = implode("\n", $writeOutput);
             }
         }
 
@@ -202,7 +212,10 @@ require_once 'includes/header.php';
                             <div class="alert alert-danger">
                                 <i class="bi bi-x-circle me-2"></i>
                                 <strong>Failed to apply to local PowerDNS</strong><br>
-                                <small>Please update manually.</small>
+                                <small>The web server couldn't write to <code>/etc/powerdns/pdns.d/api.conf</code>. Please check sudoers permissions.</small>
+                                <?php if (isset($errorDetails)): ?>
+                                    <pre class="mt-2 small bg-dark text-white p-2 rounded"><?= htmlspecialchars($errorDetails) ?></pre>
+                                <?php endif; ?>
                             </div>
                         <?php endif; ?>
                     <?php else: ?>
