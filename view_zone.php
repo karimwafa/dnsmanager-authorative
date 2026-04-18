@@ -33,9 +33,11 @@ require_once 'includes/header.php';
         <!-- Navigation handled by Navbar, but keeping context buttons -->
     </div>
 
-    <div class="card mb-4">
-        <div class="card-header">Add Record</div>
-        <div class="card-body">
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-header border-0 bg-transparent pt-4 pb-0">
+            <h6 class="mb-0 fw-semibold text-primary"><i class="bi bi-plus-lg me-2"></i> Add New Record</h6>
+        </div>
+        <div class="card-body pt-3">
             <form action="actions.php" method="POST" class="row g-3">
                 <?php csrf_field(); ?>
                 <input type="hidden" name="action" value="add_record">
@@ -68,11 +70,13 @@ require_once 'includes/header.php';
         </div>
     </div>
 
-    <div class="card shadow-sm">
-        <div class="card-header">Records</div>
-        <div class="card-body">
-            <div class="table-responsive-cards">
-                <table id="recordsTable" class="table table-striped table-hover mb-0" style="table-layout: fixed;">
+    <div class="card shadow-sm border-0">
+        <div class="card-header border-0 bg-transparent pt-4 pb-2">
+            <h5 class="mb-0 fw-semibold text-dark"><i class="bi bi-card-list text-primary me-2"></i> Records</h5>
+        </div>
+        <div class="card-body px-0 pt-0">
+            <div class="table-responsive-cards px-0">
+                <table id="recordsTable" class="table table-hover mb-0 align-middle">
                     <thead>
                         <tr>
                             <th style="width: 20%;">Name</th>
@@ -91,24 +95,25 @@ require_once 'includes/header.php';
                                     <td data-label="TTL"><?= htmlspecialchars($rrset['ttl']) ?></td>
                                     <td data-label="Content" class="text-break"><?= htmlspecialchars($record['content']) ?></td>
                                     <td data-label="Actions" class="text-end">
-                                        <div class="btn-group btn-group-sm">
-                                            <button class="btn btn-outline-warning"
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <button class="btn btn-sm btn-outline-primary"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#editModal"
                                                 data-name="<?= htmlspecialchars($rrset['name']) ?>"
                                                 data-type="<?= htmlspecialchars($rrset['type']) ?>"
                                                 data-ttl="<?= htmlspecialchars($rrset['ttl']) ?>"
-                                                data-content="<?= htmlspecialchars($record['content']) ?>">
-                                                Edit
+                                                data-content="<?= htmlspecialchars($record['content']) ?>"
+                                                title="Edit Record">
+                                                <i class="bi bi-pencil-square"></i>
                                             </button>
-                                            <form action="actions.php" method="POST" class="d-inline" onsubmit="return confirm('Delete record <?= htmlspecialchars($rrset['name']) ?>?');">
+                                            <form action="actions.php" method="POST" class="d-inline m-0" onsubmit="return confirm('Delete record <?= htmlspecialchars($rrset['name']) ?>?');">
                                                 <?php csrf_field(); ?>
                                                 <input type="hidden" name="action" value="delete_record">
                                                 <input type="hidden" name="zone_id" value="<?= htmlspecialchars($zone['id']) ?>">
                                                 <input type="hidden" name="name" value="<?= htmlspecialchars($rrset['name']) ?>">
                                                 <input type="hidden" name="type" value="<?= htmlspecialchars($rrset['type']) ?>">
-                                                <button type="submit" class="btn btn-outline-danger" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
-                                                    Delete
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Record">
+                                                    <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>
                                         </div>

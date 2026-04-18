@@ -52,12 +52,12 @@ require_once 'includes/header.php';
         <div class="alert alert-danger shadow-sm"><?= $error ?></div>
     <?php endif; ?>
 
-    <div class="card mb-4 fadeIn">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-list-columns me-2"></i>Managed Zones</h5>
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center border-0 bg-transparent pt-4 pb-2">
+            <h5 class="mb-0 fw-semibold text-dark"><i class="bi bi-hdd-network text-primary me-2"></i> Managed Zones</h5>
             <div>
-                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addZoneModal">
-                    <i class="bi bi-plus-circle me-1"></i> Add New Zone
+                <button class="btn btn-primary btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#addZoneModal">
+                    <i class="bi bi-plus-lg me-1"></i> New Zone
                 </button>
             </div>
         </div>
