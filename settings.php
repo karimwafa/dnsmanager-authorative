@@ -121,6 +121,7 @@ function checkStatus($server)
                             </div>
                         </div>
                         <div class="col-12 col-lg-2">
+                            <label class="form-label d-none d-lg-block">&nbsp;</label>
                             <button type="submit" class="btn btn-primary w-100">
                                 <i class="bi bi-plus-lg me-1"></i>Add Server
                             </button>
