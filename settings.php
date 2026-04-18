@@ -3,14 +3,22 @@ require_once 'auth.php';
 require_once 'config.php';
 require_once 'PDNSClient.php';
 
-$title = "Cluster Settings";
-require_once 'includes/header.php';
+    $title = "Cluster Settings";
+    require_once 'includes/header.php';
 
-// Helper for status check
-function checkStatus($server)
-{
-    // DB field is 'api_key', but let's support 'key' if alias not used
-    $key = $server['api_key'] ?? $server['key'] ?? '';
+    // Get current local API Key from config/pdns
+    $local_pdns_key = '';
+    if (file_exists('/etc/powerdns/pdns.conf')) {
+        $conf = file_get_contents('/etc/powerdns/pdns.conf');
+        if (preg_match('/api-key=(.*)/', $conf, $matches)) {
+            $local_pdns_key = trim($matches[1]);
+        }
+    }
+
+    // Helper for status check
+    function checkStatus($server)
+    {
+        $key = $server['api_key'] ?? $server['key'] ?? '';
     if (!isset($server['host'], $server['port']) || !$key) return false;
     $client = new PDNSClient($server['host'], $server['port'], $key);
     return $client->testConnection();
@@ -95,50 +103,50 @@ function checkStatus($server)
                 </div>
             </div>
 
-            <div class="card shadow-sm">
-                <div class="card-header"><i class="bi bi-plus-lg me-2"></i>Add a new server to the cluster</div>
+            <div class="card shadow-sm border-0">
+                <div class="card-header border-0 bg-transparent pt-4 pb-0">
+                    <h5 class="mb-0 fw-semibold text-dark"><i class="bi bi-plus-lg text-primary me-2"></i> Add Node to Cluster</h5>
+                </div>
                 <div class="card-body">
                     <form action="actions.php" method="POST" class="row g-3 align-items-end">
                         <?php csrf_field(); ?>
                         <input type="hidden" name="action" value="add_server">
                         <div class="col-12 col-sm-6 col-lg-3">
-                            <label class="form-label small text-muted">Server Name</label>
+                            <label class="form-label small fw-medium text-muted">Server Name</label>
                             <input type="text" name="name" class="form-control" placeholder="e.g. Surabaya Node" required>
                         </div>
                         <div class="col-12 col-sm-6 col-lg-3">
-                            <label class="form-label small text-muted">IP Address</label>
+                            <label class="form-label small fw-medium text-muted">IP Address</label>
                             <input type="text" name="host" class="form-control" placeholder="103.x.x.x" required>
                         </div>
-                        <div class="col-6 col-sm-4 col-lg-1">
-                            <label class="form-label small text-muted">Port</label>
+                        <div class="col-6 col-md-2 col-lg-1">
+                            <label class="form-label small fw-medium text-muted">Port</label>
                             <input type="number" name="port" class="form-control" value="8081" required>
                         </div>
                         <div class="col-12 col-sm-8 col-lg-3">
-                            <label class="form-label small text-muted">API Key</label>
-                            <div class="input-group">
-                                <input type="text" name="key" id="apiKeyInput" class="form-control" required>
-                                <button type="button" class="btn btn-outline-secondary" onclick="generateKey()">Generate</button>
-                            </div>
+                            <label class="form-label small fw-medium text-muted">PowerDNS API Key <i class="bi bi-question-circle" title="Ambil dari /etc/powerdns/pdns.conf di server tujuan"></i></label>
+                            <input type="password" name="key" class="form-control" placeholder="Daemon API Key" required>
                         </div>
                         <div class="col-12 col-lg-2">
-                            <label class="form-label d-none d-lg-block">&nbsp;</label>
                             <button type="submit" class="btn btn-primary w-100">
                                 <i class="bi bi-plus-lg me-1"></i>Add Server
                             </button>
                         </div>
                     </form>
                 </div>
+                <?php if ($local_pdns_key): ?>
+                <div class="card-footer bg-light border-0 py-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="small text-muted">
+                            <i class="bi bi-shield-lock me-1"></i> <strong>Kunci API Server Ini:</strong> 
+                            <code class="ms-1 bg-white px-2 py-1 rounded border"><?= $local_pdns_key ?></code>
+                        </div>
+                        <div class="small text-muted fst-italic">Copy ini ke server lawan jika ingin menghubungkan balik.</div>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
 
-        <script>
-            function generateKey() {
-                // Generate a random 32-character hex string
-                const array = new Uint8Array(16);
-                window.crypto.getRandomValues(array);
-                const hex = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
-                document.getElementById('apiKeyInput').value = hex;
-            }
-        </script>
 
         <?php require_once 'includes/footer.php'; ?>
