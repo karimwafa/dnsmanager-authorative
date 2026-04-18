@@ -213,6 +213,14 @@ CREATE TABLE IF NOT EXISTS app_users (
     role VARCHAR(20) DEFAULT 'admin',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS api_keys (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    label VARCHAR(255) NOT NULL,
+    description TEXT,
+    key_string VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 EOF
 
 # 3. Configure PowerDNS
