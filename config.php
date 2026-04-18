@@ -23,7 +23,8 @@ function decryptData($data)
     // Check if decoded data contains our delimiter '::'
     if (strpos($decoded, '::') !== false) {
         list($encrypted_data, $iv) = explode('::', $decoded, 2);
-        return openssl_decrypt($encrypted_data, 'aes-256-cbc', APP_SECRET, 0, $iv);
+        $decrypted = openssl_decrypt($encrypted_data, 'aes-256-cbc', APP_SECRET, 0, $iv);
+        return ($decrypted === false) ? $data : $decrypted;
     }
 
     return $data;

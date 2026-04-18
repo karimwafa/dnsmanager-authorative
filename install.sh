@@ -196,7 +196,8 @@ CREATE TABLE IF NOT EXISTS cluster_servers (
     api_key VARCHAR(255) NOT NULL,
     role ENUM('sync', 'standalone') DEFAULT 'sync',
     type ENUM('native', 'master', 'slave') DEFAULT 'native',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY host_port (host, port)
 );
 
 CREATE TABLE IF NOT EXISTS login_attempts (
@@ -309,9 +310,18 @@ mysql -u root -p"$DB_ROOT_PASS" "$DB_NAME" -e "INSERT IGNORE INTO app_users (use
 # Needs encrypted key
 # We need to replicate the encryptData logic or just insert it directly if we knew the secret.
 # But APP_SECRET is in config.php.
-# Let's generate a new APP_SECRET for this install to be secure.
+# Generate/Reuse APP_SECRET
+if [ -f "$WEB_DIR/config.php" ]; then
+    EXISTING_SECRET=$(grep -oP "define\('APP_SECRET', '\K[^']+" "$WEB_DIR/config.php" || true)
+fi
 
-NEW_APP_SECRET=$(openssl rand -hex 32)
+if [[ -z "$EXISTING_SECRET" || "$EXISTING_SECRET" == "YOUR_APP_SECRET_HERE" ]]; then
+    log "Generating new APP_SECRET..."
+    NEW_APP_SECRET=$(openssl rand -hex 32)
+else
+    log "Reusing existing APP_SECRET."
+    NEW_APP_SECRET="$EXISTING_SECRET"
+fi
 sed -i "s/define('APP_SECRET', '.*');/define('APP_SECRET', '$NEW_APP_SECRET');/" $WEB_DIR/config.php
 
 # Now use PHP to encrypt the key using the new secret
@@ -325,7 +335,7 @@ ENCRYPTED_KEY=$(php -r "
     echo encryptData('$PDNS_API_KEY');
 ")
 
-mysql -u root -p"$DB_ROOT_PASS" "$DB_NAME" -e "INSERT INTO cluster_servers (name, host, port, api_key, role, type) VALUES ('Local Node', '127.0.0.1', 8081, '$ENCRYPTED_KEY', 'sync', 'native');"
+mysql -u root -p"$DB_ROOT_PASS" "$DB_NAME" -e "INSERT INTO cluster_servers (name, host, port, api_key, role, type) VALUES ('Local Node', '127.0.0.1', 8081, '$ENCRYPTED_KEY', 'sync', 'native') ON DUPLICATE KEY UPDATE api_key='$ENCRYPTED_KEY', name='Local Node';"
 
 # Permissions
 chown -R www-data:www-data $WEB_DIR

@@ -49,8 +49,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($restartResult === 0) {
                     // Update Primary Server (Local) in cluster_servers if exists
                     $encryptedKey = encryptData($generatedKey);
-                    $stmt = $pdo->prepare("UPDATE cluster_servers SET api_key = ? WHERE host = '127.0.0.1' OR name LIKE '%Local%'");
-                    $stmt->execute([$encryptedKey]);
+                    
+                    // Smart update: detect all local IPs to find entries that might use public IP
+                    $localIPs = explode(' ', shell_exec("hostname -I") . " 127.0.0.1");
+                    $localIPs = array_map('trim', array_filter($localIPs));
+                    $placeholders = implode(',', array_fill(0, count($localIPs), '?'));
+                    
+                    $sql = "UPDATE cluster_servers SET api_key = ? WHERE host IN ($placeholders) OR name LIKE '%Local%'";
+                    $params = array_merge([$encryptedKey], $localIPs);
+                    
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute($params);
 
                     $applyResult = 'success';
                 } else {
