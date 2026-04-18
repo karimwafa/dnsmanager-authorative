@@ -218,7 +218,7 @@ require_once 'includes/header.php';
                     });
                     $('#dt-search-container').append(searchInput);
 
-                    var lengthSelect = $('<select class="form-select form-select-sm" style="width:auto;"></select>').on('change', (e) => {
+                    var lengthSelect = $('<select class="form-select form-select-sm" style="min-width:72px; padding-right:28px;"></select>').on('change', (e) => {
                         this.api().page.len(e.target.value).draw();
                     });
                     [[10,'10'],[25,'25'],[50,'50'],[-1,'All']].forEach(([val, label]) => {
