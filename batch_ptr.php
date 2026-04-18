@@ -52,11 +52,12 @@ require_once 'includes/header.php';
 ?>
 
 <div class="container py-4">
-    <h2>Batch PTR Generator</h2>
-
     <?php if ($msg): ?><div class="alert alert-success"><?= $msg ?></div><?php endif; ?>
 
-    <div class="card shadow-sm">
+    <div class="card shadow-sm border-0">
+        <div class="card-header border-0 bg-transparent pt-4 pb-2">
+            <h5 class="mb-0 fw-semibold text-dark"><i class="bi bi-arrow-repeat text-primary me-2"></i> Batch PTR Generator</h5>
+        </div>
         <div class="card-body">
             <form method="POST">
                 <div class="mb-3">
