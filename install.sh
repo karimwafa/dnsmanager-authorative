@@ -90,14 +90,15 @@ mysql -e "FLUSH PRIVILEGES;"
 
 # Create PDNS Database and User
 mysql -u root -p"$DB_ROOT_PASS" -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
-mysql -u root -p"$DB_ROOT_PASS" -e "CREATE USER IF NOT EXISTS '$DB_PDNS_USER'@'localhost' IDENTIFIED BY '$DB_PDNS_PASS';"
+mysql -u root -p"$DB_ROOT_PASS" -e "CREATE USER IF NOT EXISTS '$DB_PDNS_USER'@'localhost';"
+mysql -u root -p"$DB_ROOT_PASS" -e "ALTER USER '$DB_PDNS_USER'@'localhost' IDENTIFIED BY '$DB_PDNS_PASS';"
 mysql -u root -p"$DB_ROOT_PASS" -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_PDNS_USER'@'localhost';"
 mysql -u root -p"$DB_ROOT_PASS" -e "FLUSH PRIVILEGES;"
 
 # Import PowerDNS Schema
 # Schema source: https://doc.powerdns.com/authoritative/backends/generic-mysql.html
 log "Importing PowerDNS Schema..."
-mysql -u root -p"$DB_ROOT_PASS" "$DB_NAME" <<EOF
+mysql --force -u root -p"$DB_ROOT_PASS" "$DB_NAME" <<EOF
 CREATE TABLE IF NOT EXISTS domains (
   id                    INT AUTO_INCREMENT,
   name                  VARCHAR(255) NOT NULL,
@@ -116,7 +117,7 @@ CREATE TABLE IF NOT EXISTS records (
   domain_id             INT DEFAULT NULL,
   name                  VARCHAR(255) DEFAULT NULL,
   type                  VARCHAR(10) DEFAULT NULL,
-  content               VARCHAR(64000) DEFAULT NULL,
+  content               TEXT DEFAULT NULL,
   ttl                   INT DEFAULT NULL,
   prio                  INT DEFAULT NULL,
   disabled              TINYINT(1) DEFAULT 0,
@@ -143,7 +144,7 @@ CREATE TABLE IF NOT EXISTS comments (
   type                  VARCHAR(10) NOT NULL,
   modified_at           INT NOT NULL,
   account               VARCHAR(40) DEFAULT NULL,
-  comment               VARCHAR(64000) NOT NULL,
+  comment               TEXT NOT NULL,
   PRIMARY KEY (id)
 ) Engine=InnoDB;
 
@@ -184,7 +185,7 @@ EOF
 
 # Import Application Tables
 log "Importing Application Schema..."
-mysql -u root -p"$DB_ROOT_PASS" "$DB_NAME" <<EOF
+mysql --force -u root -p"$DB_ROOT_PASS" "$DB_NAME" <<EOF
 CREATE TABLE IF NOT EXISTS cluster_servers (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -249,7 +250,8 @@ fi
 # If running standalone, you might need to git clone or unzip here.
 # For this script we assume the files are in the current directory or a subdirectory
 cp -r ./* $WEB_DIR/ 2>/dev/null || true 
-rm $WEB_DIR/install.sh 2>/dev/null || true # Don't leave installer in webroot
+rm -f $WEB_DIR/index.html 2>/dev/null || true # Remove default apache page
+rm -f $WEB_DIR/install.sh 2>/dev/null || true # Don't leave installer in webroot
 
 # Generate db.php
 cat > $WEB_DIR/db.php <<EOF
