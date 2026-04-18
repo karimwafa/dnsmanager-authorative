@@ -74,8 +74,12 @@ require_once 'includes/header.php';
 
     <!-- Records Table Card -->
     <div class="card shadow-sm border-0">
-        <div class="card-header border-0 bg-transparent pt-4 pb-2">
+        <div class="card-header border-0 bg-transparent pt-4 pb-2 d-flex align-items-center justify-content-between flex-wrap gap-2">
             <h5 class="mb-0 fw-semibold text-dark"><i class="bi bi-card-list text-primary me-2"></i> Records</h5>
+            <div class="d-flex align-items-center gap-3">
+                <div id="dt-search-container"></div>
+                <div id="dt-length-container"></div>
+            </div>
         </div>
         <div class="card-body px-0 pt-0">
             <div class="table-responsive">
@@ -194,30 +198,42 @@ require_once 'includes/header.php';
         // Initialize DataTables
         if ($.fn.DataTable) {
             $('#recordsTable').DataTable({
-                "order": [
-                    [0, "asc"]
-                ], // Default sort by Name
-                "pageLength": 10,
-                "lengthMenu": [
-                    [10, 25, 50, -1],
-                    [10, 25, 50, "All"]
-                ],
+                "dom": 'tip',
+                "order": [[0, "asc"]],
+                "pageLength": 25,
+                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
                 "language": {
-                    "search": "Filter records:",
-                    "lengthMenu": "Show _MENU_ entries",
-                    "info": "Showing _START_ to _END_ of _TOTAL_ entries",
+                    "info": "Showing _START_–_END_ of _TOTAL_ records",
                     "paginate": {
-                        "first": "First",
-                        "last": "Last",
-                        "next": "Next",
-                        "previous": "Previous"
-                    }
+                        "next": "Next →",
+                        "previous": "← Prev"
+                    },
+                    "emptyTable": "No records found."
                 },
-                "columnDefs": [{
-                        "orderable": false,
-                        "targets": 4
-                    } // Disable sorting on Actions column (index 4)
-                ]
+                "columnDefs": [{ "orderable": false, "targets": 4 }],
+                "initComplete": function() {
+                    // Move search to our custom container in the card header
+                    var searchInput = $('<input type="search" class="form-control form-control-sm" placeholder="🔍 Filter records..." style="width:220px;">').on('keyup', (e) => {
+                        this.api().search(e.target.value).draw();
+                    });
+                    $('#dt-search-container').append(searchInput);
+
+                    var lengthSelect = $('<select class="form-select form-select-sm" style="width:auto;"></select>').on('change', (e) => {
+                        this.api().page.len(e.target.value).draw();
+                    });
+                    [[10,'10'],[25,'25'],[50,'50'],[-1,'All']].forEach(([val, label]) => {
+                        var opt = $('<option>').val(val).text(label);
+                        if (val === 25) opt.prop('selected', true);
+                        lengthSelect.append(opt);
+                    });
+                    $('#dt-length-container').append(
+                        $('<div class="d-flex align-items-center gap-1">').append(
+                            $('<span class="text-muted small">').text('Show'),
+                            lengthSelect,
+                            $('<span class="text-muted small">').text('entries')
+                        )
+                    );
+                }
             });
         } else {
             console.error("DataTables library not loaded!");
