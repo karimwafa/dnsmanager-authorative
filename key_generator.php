@@ -80,16 +80,16 @@ require_once 'includes/header.php';
 ?>
 
 <div class="container py-4">
-    <div class="card shadow-sm">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Generated Keys History</h5>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#generateModal">
-                + Generate New Key
+    <div class="card shadow-sm border-0">
+        <div class="card-header border-0 bg-transparent d-flex justify-content-between align-items-center pt-4 pb-2">
+            <h5 class="mb-0 fw-semibold text-dark"><i class="bi bi-key text-primary me-2"></i> API Keys</h5>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#generateModal">
+                <i class="bi bi-plus-lg me-1"></i> Generate New Key
             </button>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive-cards">
-                <table class="table table-striped table-hover mb-0" style="table-layout: fixed;">
+                <table class="table table-hover mb-0 align-middle">
                     <thead class="table-light">
                         <tr>
                             <th style="width: 20%;">Label</th>

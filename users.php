@@ -14,16 +14,16 @@ try {
 ?>
 
 <div class="container py-4">
-    <div class="card shadow-sm">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>User Management</h5>
+    <div class="card shadow-sm border-0">
+        <div class="card-header border-0 bg-transparent d-flex justify-content-between align-items-center pt-4 pb-2">
+            <h5 class="mb-0 fw-semibold text-dark"><i class="bi bi-people-fill text-primary me-2"></i> User Management</h5>
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
                 <i class="bi bi-person-plus-fill me-1"></i> Add New User
             </button>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive-cards">
-                <table class="table table-striped table-hover mb-0" style="table-layout: fixed;">
+                <table class="table table-hover mb-0 align-middle">
                     <thead class="table-light">
                         <tr>
                             <th style="width: 10%;">ID</th>
@@ -41,25 +41,27 @@ try {
                                 <td data-label="Role"><span class="badge bg-secondary"><?= htmlspecialchars($user['role']) ?></span></td>
                                 <td data-label="Created At"><small class="text-muted"><?= $user['created_at'] ?></small></td>
                                 <td data-label="Actions" class="text-end">
-                                    <button class="btn btn-sm btn-outline-warning me-1"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#editUserModal"
-                                        data-id="<?= $user['id'] ?>"
-                                        data-username="<?= htmlspecialchars($user['username']) ?>">
-                                        <i class="bi bi-pencil"></i> Edit
-                                    </button>
-                                    <?php if ($user['username'] !== 'admin' && $user['username'] !== $_SESSION['username']): ?>
-                                        <form action="actions.php" method="POST" class="d-inline" onsubmit="return confirm('Delete user <?= htmlspecialchars($user['username']) ?>?');">
-                                            <?php csrf_field(); ?>
-                                            <input type="hidden" name="action" value="delete_user">
-                                            <input type="hidden" name="id" value="<?= $user['id'] ?>">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                <i class="bi bi-trash"></i> Delete
-                                            </button>
-                                        </form>
-                                    <?php else: ?>
-                                        <span class="text-muted small fst-italic me-2">Protected</span>
-                                    <?php endif; ?>
+                                    <div class="d-flex justify-content-end align-items-center gap-2">
+                                        <button class="btn btn-sm btn-outline-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#editUserModal"
+                                            data-id="<?= $user['id'] ?>"
+                                            data-username="<?= htmlspecialchars($user['username']) ?>">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </button>
+                                        <?php if ($user['username'] !== 'admin' && $user['username'] !== $_SESSION['username']): ?>
+                                            <form action="actions.php" method="POST" class="d-inline m-0" onsubmit="return confirm('Delete user <?= htmlspecialchars($user['username']) ?>?');">
+                                                <?php csrf_field(); ?>
+                                                <input type="hidden" name="action" value="delete_user">
+                                                <input type="hidden" name="id" value="<?= $user['id'] ?>">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    <i class="bi bi-trash"></i> Delete
+                                                </button>
+                                            </form>
+                                        <?php else: ?>
+                                            <span class="text-muted small fst-italic">Protected</span>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

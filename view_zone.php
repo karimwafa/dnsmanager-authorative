@@ -28,14 +28,10 @@ require_once 'includes/header.php';
 ?>
 
 <div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3><i class="bi bi-globe me-2"></i><?= htmlspecialchars($zone['name']) ?></h3>
-        <!-- Navigation handled by Navbar, but keeping context buttons -->
-    </div>
-
     <div class="card mb-4 border-0 shadow-sm">
-        <div class="card-header border-0 bg-transparent pt-4 pb-0">
-            <h6 class="mb-0 fw-semibold text-primary"><i class="bi bi-plus-lg me-2"></i> Add New Record</h6>
+        <div class="card-header border-0 bg-transparent pt-4 pb-0 d-flex align-items-center justify-content-between">
+            <h5 class="mb-0 fw-semibold text-dark"><i class="bi bi-globe text-primary me-2"></i><?= htmlspecialchars($zone['name']) ?></h5>
+            <span class="text-muted small"><i class="bi bi-plus-lg text-primary me-1"></i> Add New Record</span>
         </div>
         <div class="card-body pt-3">
             <form action="actions.php" method="POST" class="row g-3">
