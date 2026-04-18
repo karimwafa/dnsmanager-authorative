@@ -107,6 +107,8 @@ CREATE TABLE IF NOT EXISTS domains (
   type                  VARCHAR(6) NOT NULL,
   notified_serial       INT DEFAULT NULL,
   account               VARCHAR(40) DEFAULT NULL,
+  options               TEXT DEFAULT NULL,
+  catalog               VARCHAR(255) DEFAULT NULL,
   PRIMARY KEY (id)
 ) Engine=InnoDB;
 
