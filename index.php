@@ -63,7 +63,7 @@ require_once 'includes/header.php';
         </div>
         <div class="card-body p-0">
             <div class="table-responsive-cards">
-                <table class="table table-hover mb-0" style="table-layout: fixed;">
+                <table class="table table-hover mb-0 align-middle">
                     <thead>
                         <tr>
                             <th style="width: 35%;">Zone Name</th>
@@ -88,14 +88,17 @@ require_once 'includes/header.php';
                                         <?php endif; ?>
                                     </td>
                                     <td data-label="Actions" class="text-end">
-                                        <div class="btn-group btn-group-sm">
-                                            <a href="view_zone.php?zone=<?= urlencode($zone['id']) ?>" class="btn btn-outline-info">Manage</a>
-                                            <a href="view_zone.php?zone=<?= urlencode($zone['id']) ?>" class="btn btn-outline-info">Manage</a>
-                                            <form action="actions.php" method="POST" class="d-inline" onsubmit="return confirm('Delete this zone from ALL servers?');">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="view_zone.php?zone=<?= urlencode($zone['id']) ?>" class="btn btn-sm btn-outline-primary" title="Manage Zone">
+                                                <i class="bi bi-gear"></i> Manage
+                                            </a>
+                                            <form action="actions.php" method="POST" class="d-inline m-0" onsubmit="return confirm('Delete this zone from ALL servers?');">
                                                 <?php csrf_field(); ?>
                                                 <input type="hidden" name="action" value="delete_zone">
                                                 <input type="hidden" name="zone" value="<?= htmlspecialchars($zone['id']) ?>">
-                                                <button type="submit" class="btn btn-outline-danger">Delete</button>
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Zone">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
                                             </form>
                                         </div>
                                     </td>
