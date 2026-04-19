@@ -249,49 +249,6 @@ webserver-allow-from=127.0.0.1,::1,10.0.0.0/8</pre>
 <?php endif; ?>
 
 <script>
-    function copyToClipboard(text, button) {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(function() {
-                showCopySuccess(button);
-            }, function(err) {
-                fallbackCopy(text, button);
-            });
-        } else {
-            fallbackCopy(text, button);
-        }
-    }
-
-    function fallbackCopy(text, button) {
-        var textArea = document.createElement('textarea');
-        textArea.value = text;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        textArea.style.top = '-999999px';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        try {
-            document.execCommand('copy');
-            showCopySuccess(button);
-        } catch (err) {
-            alert('Failed to copy. Please copy manually.');
-        }
-        document.body.removeChild(textArea);
-    }
-
-    function showCopySuccess(button) {
-        if (button) {
-            var originalText = button.textContent;
-            button.textContent = 'Copied!';
-            button.classList.remove('btn-outline-primary', 'btn-outline-secondary');
-            button.classList.add('btn-success');
-            setTimeout(function() {
-                button.textContent = originalText;
-                button.classList.remove('btn-success');
-                button.classList.add('btn-outline-primary');
-            }, 2000);
-        }
-    }
 
     // Handle copy buttons in table
     document.querySelectorAll('.copy-btn').forEach(function(btn) {
