@@ -5,8 +5,16 @@ require_once 'PDNSClient.php';
 
 // Initialize Clients
 $clients = [];
+
+// 1. ADD LOCAL NODE FIRST (High Priority)
+$localKey = getLocalApiKey();
+if ($localKey) {
+    $clients['This Server'] = new PDNSClient('127.0.0.1', 8081, $localKey);
+}
+
+// 2. Add remote nodes from Database
 foreach ($servers as $server) {
-    // DB uses 'api_key', fallback to 'key' if legacy
+    if ($server['host'] === '127.0.0.1' || $server['host'] === 'localhost') continue;
     $key = $server['api_key'] ?? $server['key'] ?? '';
     if ($key) {
         $clients[$server['name']] = new PDNSClient($server['host'], $server['port'], $key);
@@ -25,6 +33,7 @@ if (!empty($clients)) {
             if (isset($zonesRes['code']) && $zonesRes['code'] == 200) {
                 $zoneList = $zonesRes['body'] ?? [];
                 $error = null; // Clear any previous errors from earlier nodes
+                $activeSource = $name; // Store who gave us the data
                 break; // Success! stop trying other nodes
             } else {
                 $status = $zonesRes['code'] ?? 'Unknown';
@@ -58,7 +67,14 @@ require_once 'includes/header.php';
 
     <div class="card mb-4 border-0 shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center border-0 bg-transparent pt-4 pb-2">
-            <h5 class="mb-0 fw-semibold text-dark"><i class="bi bi-hdd-network text-primary me-2"></i> Managed Zones</h5>
+            <div>
+                <h5 class="mb-0 fw-semibold text-dark"><i class="bi bi-hdd-network text-primary me-2"></i> Managed Zones</h5>
+                <?php if (isset($activeSource)): ?>
+                    <span class="badge bg-light text-primary border border-primary-subtle fw-normal mt-1">
+                        <i class="bi bi-database-check me-1"></i> Data from: <?= htmlspecialchars($activeSource) ?>
+                    </span>
+                <?php endif; ?>
+            </div>
             <div>
                 <button class="btn btn-primary btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#addZoneModal">
                     <i class="bi bi-plus-lg me-1"></i> New Zone

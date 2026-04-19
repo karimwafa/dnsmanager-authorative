@@ -30,15 +30,31 @@ function decryptData($data)
     return $data;
 }
 
-// Fetch servers from MySQL
-$stmt = $pdo->query("SELECT * FROM cluster_servers ORDER BY id ASC");
-$serversRaw = $stmt->fetchAll();
-$servers = [];
-
-if ($serversRaw) {
-    foreach ($serversRaw as $s) {
-        // Automatically decrypt key if encrypted
-        $s['api_key'] = decryptData($s['api_key']);
-        $servers[] = $s;
+// Helper to get local API Key from configuration files
+function getLocalApiKey() {
+    $paths = ['/etc/powerdns/pdns.d/api.conf', '/etc/powerdns/pdns.conf'];
+    foreach ($paths as $path) {
+        if (file_exists($path)) {
+            $content = file_get_contents($path);
+            if (preg_match('/api-key=([^\s#]+)/', $content, $matches)) {
+                return $matches[1];
+            }
+        }
     }
+    return null;
+}
+
+// Fetch servers from MySQL
+$servers = [];
+try {
+    $stmt = $pdo->query("SELECT * FROM cluster_servers ORDER BY id ASC");
+    $serversRaw = $stmt->fetchAll();
+    if ($serversRaw) {
+        foreach ($serversRaw as $s) {
+            $s['api_key'] = decryptData($s['api_key']);
+            $servers[] = $s;
+        }
+    }
+} catch (PDOException $e) {
+    // Silent fail if table is missing
 }

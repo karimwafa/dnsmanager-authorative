@@ -12,9 +12,19 @@ verify_csrf_token();
 
 // Initialize Clients (servers loaded from config.php -> MySQL)
 $clients = [];
+
+// 1. ALWAYS add the Local Node for immediate sync on this machine
+$localKey = getLocalApiKey();
+if ($localKey) {
+    $clients['Local Node (Auto)'] = new PDNSClient('127.0.0.1', 8081, $localKey);
+}
+
+// 2. Add remote nodes from Database
 foreach ($servers as $server) {
     if (isset($server['host']) && isset($server['port']) && isset($server['api_key'])) {
-        // Only add if role is sync (default) or explicitly set to sync
+        // Skip if already added as local node
+        if ($server['host'] === '127.0.0.1' || $server['host'] === 'localhost') continue;
+        
         $role = $server['role'] ?? 'sync';
         if ($role === 'sync') {
             $clients[$server['name']] = new PDNSClient($server['host'], $server['port'], $server['api_key']);
