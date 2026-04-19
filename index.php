@@ -15,30 +15,34 @@ foreach ($servers as $server) {
 
 $zoneList = [];
 $error = null;
+$errorDetails = [];
 
-// Fetch Zones from Primary
+// Fetch Zones with failover logic
 if (!empty($clients)) {
-    $primaryClient = reset($clients); // Get first client
-    try {
-        $zones = $primaryClient->getZones();
-        if (isset($zones['code']) && $zones['code'] != 200) {
-            $error = "Failed to fetch zones from " . key($clients) . ": " . print_r($zones, true);
-        } else {
-            $zoneList = $zones['body'] ?? [];
+    foreach ($clients as $name => $client) {
+        try {
+            $zonesRes = $client->getZones();
+            if (isset($zonesRes['code']) && $zonesRes['code'] == 200) {
+                $zoneList = $zonesRes['body'] ?? [];
+                $error = null; // Clear any previous errors from earlier nodes
+                break; // Success! stop trying other nodes
+            } else {
+                $status = $zonesRes['code'] ?? 'Unknown';
+                $body = is_array($zonesRes['body']) ? json_encode($zonesRes['body']) : print_r($zonesRes['body'], true);
+                $errorDetails[] = "Server '$name' ($status): $body";
+            }
+        } catch (Exception $e) {
+            $errorDetails[] = "Server '$name' connection failed: " . $e->getMessage();
         }
-    } catch (Exception $e) {
-        $error = "Connection error: " . $e->getMessage();
+    }
+    
+    // If all nodes failed
+    if (empty($zoneList) && !empty($errorDetails)) {
+        $error = "Failed to fetch zones from any server in the cluster. Troubleshooting info:<br>";
+        $error .= "<small><ul><li>" . implode("</li><li>", $errorDetails) . "</li></ul></small>";
     }
 } else {
-    // If no servers configured
-    $error = "No servers configured in the cluster. Please add a server in Settings.";
-}
-
-// Handle API Errors
-if (isset($zones['code']) && $zones['code'] != 200) {
-    $error = "Failed to fetch zones: " . print_r($zones, true);
-} else {
-    $zoneList = $zones['body'];
+    $error = "No active servers configured in the cluster. Please add a server in Settings.";
 }
 // START OF PAGE
 $title = "DNS Author Manager";
